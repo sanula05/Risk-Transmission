@@ -249,6 +249,18 @@ LSEG_SERIES = (
         "USD_3M_SOFR_OIS",
         "USD_3M_SOFR_OIS.csv",
     ),
+    (
+        ".MOVE",
+        "TRDPRC_1",
+        "MOVE_Index",
+        "MOVE_Index_Daily.csv",
+    ),
+    (
+        ".VIX",
+        "TRDPRC_1",
+        "VIX_Index",
+        "VIX_Index_Daily.csv",
+    ),
 )
 
 
@@ -351,12 +363,17 @@ def generate_panel_b(start: str = "2020-01-01", end: str | None = None) -> None:
 
     print("Opening the active LSEG Workspace session...")
     ld.open_session()
+    failures = []
     try:
         for ric, field, output_column, filename in LSEG_SERIES:
             print(f"Downloading {output_column} ({ric})...")
-            _download_lseg_series(
-                ld, ric, field, output_column, filename, start, end
-            )
+            try:
+                _download_lseg_series(
+                    ld, ric, field, output_column, filename, start, end
+                )
+            except Exception as exc:
+                failures.append((ric, filename, str(exc)))
+                print(f"  FAILED {ric}: {exc}")
     finally:
         ld.close_session()
 
@@ -364,7 +381,11 @@ def generate_panel_b(start: str = "2020-01-01", end: str | None = None) -> None:
     spreads = construct_sofr_ois_spreads()
     print(f"  saved {len(sofr):,} rows to SOFR.csv")
     print(f"  saved {len(spreads):,} rows to SOFR_OIS_Spreads_Daily.csv")
-    print("Panel B: saved 6 CSV files to", PANEL_B_FOLDER)
+    print("Panel B files saved to", PANEL_B_FOLDER)
+    if failures:
+        print("LSEG series not saved:")
+        for ric, filename, message in failures:
+            print(f"  {ric} -> {filename}: {message}")
 
 
 def _yahoo_download(ticker: str, **request: Any) -> pd.DataFrame:
@@ -488,3 +509,112 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# For Vix and MOVE data
+# Panel D. Daily risk/stress indices from LSEG Workspace (2020-latest)
+PANEL_D_DATA_FOLDER = Path('Panel_D_Data')
+PANEL_D_DATA_FOLDER.mkdir(parents=True, exist_ok=True)
+
+STRESS_INDEX_RICS = {
+    'VIX': '.VIX',
+    'MOVE': '.MOVE',
+}
+START_DATE = '2020-01-01'
+# LSEG end dates can be exclusive, so request through tomorrow.
+END_DATE = (pd.Timestamp.now(tz='UTC') + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
+
+def download_stress_index(name, ric):
+    history = lsdt.get_history(
+        universe=ric,
+        fields=['TRDPRC_1'],
+        interval='1D',
+        start=START_DATE,
+        end=END_DATE,
+    )
+    if history.empty:
+        raise ValueError(f'LSEG returned no daily history for {name} ({ric})')
+
+    if isinstance(history.columns, pd.MultiIndex):
+        matching = [
+            column for column in history.columns
+            if 'TRDPRC_1' in {str(level) for level in column}
+        ]
+        value_column = matching[0] if matching else history.columns[0]
+    else:
+        value_column = 'TRDPRC_1' if 'TRDPRC_1' in history.columns else history.columns[0]
+
+    output = pd.DataFrame({
+        'Date': pd.to_datetime(history.index, utc=True),
+        'RIC': ric,
+        'LSEG_Field': 'TRDPRC_1',
+        f'{name}_Index': pd.to_numeric(history[value_column], errors='coerce').to_numpy(),
+    })
+    output = (
+        output.dropna(subset=[f'{name}_Index'])
+        .sort_values('Date')
+        .drop_duplicates('Date', keep='last')
+        .reset_index(drop=True)
+    )
+    output_path = PANEL_D_DATA_FOLDER / f'{name}_Index_Daily.csv'
+    output.to_csv(output_path, index=False)
+    print(f'Saved {len(output):,} rows to {output_path}')
+    return output
+
+# Use the active LSEG Workspace desktop login; no credentials are stored here.
+stress_index_data = {}
+stress_index_errors = {}
+lsdt.open_session()
+try:
+    for index_name, index_ric in STRESS_INDEX_RICS.items():
+        print(f'Downloading {index_name} ({index_ric})...')
+        try:
+            stress_index_data[index_name] = download_stress_index(index_name, index_ric)
+        except Exception as error:
+            stress_index_errors[index_name] = str(error)
+            print(f'FAILED {index_name}: {error}')
+finally:
+    lsdt.close_session()
+
+# DataFrame variables are available when the corresponding download succeeds.
+VIX_daily = stress_index_data.get('VIX')
+MOVE_daily = stress_index_data.get('MOVE')
+
+if stress_index_errors:
+    print('Some LSEG series could not be saved:', stress_index_errors)
+
+
+# Panel D. VIX daily data from Yahoo Finance (2020-latest)
+PANEL_D_DATA_FOLDER = Path('Panel_D_Data')
+PANEL_D_DATA_FOLDER.mkdir(parents=True, exist_ok=True)
+
+VIX_START_DATE = '2020-01-01'
+VIX_END_DATE = (pd.Timestamp.now(tz='UTC') + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
+
+vix_history = yf.download(
+    '^VIX',
+    start=VIX_START_DATE,
+    end=VIX_END_DATE,
+    interval='1d',
+    auto_adjust=False,
+    actions=False,
+    progress=False,
+    threads=False,
+    multi_level_index=False,
+)
+
+if vix_history.empty:
+    raise ValueError('Yahoo Finance returned no daily VIX data for ^VIX')
+if isinstance(vix_history.columns, pd.MultiIndex):
+    vix_history.columns = vix_history.columns.get_level_values(0)
+
+vix_history.index = pd.to_datetime(vix_history.index, utc=True)
+vix_history.index.name = 'Date'
+vix_columns = [column for column in ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'] if column in vix_history.columns]
+VIX_daily = vix_history[vix_columns].reset_index()
+VIX_daily.insert(1, 'Ticker', '^VIX')
+VIX_daily.insert(2, 'Source', 'Yahoo Finance')
+VIX_daily.to_csv(PANEL_D_DATA_FOLDER / 'VIX_Index_Daily.csv', index=False)
+
+print(f'Saved {len(VIX_daily):,} rows to {PANEL_D_DATA_FOLDER / "VIX_Index_Daily.csv"}')
+VIX_daily.tail()
