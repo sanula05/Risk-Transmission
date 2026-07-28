@@ -1,0 +1,9 @@
+series,ric,error
+SOFR,USDSOFR=,"No usable history for SOFR (USDSOFR=). PRIMACT_1: No data to return, please check errors: ERROR: No successful response.
+(TSCC.QS.UserRequestError.90006, The universe does not support the following fields: [PRIMACT_1]) | TRDPRC_1: No data to return, please check errors: ERROR: No successful response.
+(TSCC.QS.UserRequestError.90006, The universe does not support the following fields: [TRDPRC_1]) | CF_CLOSE: No data to return, please check errors: ERROR: No successful response.
+(TSCC.QS.UserRequestError.90006, The universe does not support the following fields: [CF_CLOSE])"
+US_Treasury_TGCR,USDTGCR=,"No usable history for US_Treasury_TGCR (USDTGCR=). PRIMACT_1: No data to return, please check errors: ERROR: No successful response.
+(TSCC.QS.UserRequestError.90006, The universe does not support the following fields: [PRIMACT_1]) | TRDPRC_1: No data to return, please check errors: ERROR: No successful response.
+(TSCC.QS.UserRequestError.90006, The universe does not support the following fields: [TRDPRC_1]) | CF_CLOSE: No data to return, please check errors: ERROR: No successful response.
+(TSCC.QS.UserRequestError.90006, The universe does not support the following fields: [CF_CLOSE])"
