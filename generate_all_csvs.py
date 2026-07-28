@@ -41,7 +41,7 @@ DEFILLAMA_CATALOG_URL = (
 DEFILLAMA_HISTORY_URL = (
     "https://stablecoins.llama.fi/stablecoincharts/all?stablecoin={stablecoin_id}"
 )
-FRED_SOFR_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv"
+
 
 
 def _today_string() -> str:
@@ -59,7 +59,6 @@ def _request_json(url: str) -> Any:
 
 
 def _pegged_usd(value: Any) -> float:
-    """Extract the pegged-USD number from a DeFiLlama value object."""
     if isinstance(value, dict):
         value = value.get("peggedUSD")
     return pd.to_numeric(value, errors="coerce")
@@ -123,7 +122,6 @@ def _defillama_coin_history(symbol: str, stablecoin_id: str) -> pd.DataFrame:
 
 
 def generate_panel_a(start: str = "2020-01-01", end: str | None = None) -> None:
-    """Create the four Panel A stablecoin CSV files from DeFiLlama."""
     PANEL_A_FOLDER.mkdir(parents=True, exist_ok=True)
     end = end or _today_string()
     stablecoin_ids = _find_stablecoin_ids()
@@ -304,30 +302,8 @@ def _download_lseg_series(
     print(f"  saved {len(output):,} rows to {filename}")
 
 
-def download_sofr_from_fred(
-    start: str = "2020-01-01", end: str | None = None
-) -> pd.DataFrame:
-    """Download the daily SOFR series from FRED without requiring an API key."""
-    end = end or _today_string()
-    response = requests.get(
-        FRED_SOFR_URL,
-        params={"id": "SOFR", "cosd": start, "coed": end},
-        timeout=60,
-        headers={"User-Agent": "Risk-Transmission-Research/1.0"},
-    )
-    response.raise_for_status()
-    sofr = pd.read_csv(StringIO(response.text))
-    sofr.columns = ["observation_date", "SOFR"]
-    sofr["observation_date"] = pd.to_datetime(
-        sofr["observation_date"], errors="coerce"
-    )
-    sofr["SOFR"] = pd.to_numeric(sofr["SOFR"], errors="coerce")
-    sofr = sofr.dropna(subset=["observation_date", "SOFR"])
-    sofr = sofr.sort_values("observation_date").drop_duplicates(
-        "observation_date", keep="last"
-    )
-    sofr.to_csv(PANEL_B_FOLDER / "SOFR.csv", index=False)
-    return sofr
+
+
 
 
 def construct_sofr_ois_spreads() -> pd.DataFrame:
