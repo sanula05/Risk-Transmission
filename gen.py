@@ -6,14 +6,6 @@ Panel A: DeFiLlama stablecoin API
 Panel B: LSEG Workspace Data Library and FRED
 Panel C: Yahoo Finance through yfinance
 
-Examples
---------
-    python generate_all_csvs.py --panels a
-    python generate_all_csvs.py --panels b
-    python generate_all_csvs.py --panels c
-    python generate_all_csvs.py --panels a c
-    python generate_all_csvs.py --panels all
-
 Panel B requires LSEG Workspace to be open and signed in. No LSEG username,
 password, or application key is stored in this file.
 """
