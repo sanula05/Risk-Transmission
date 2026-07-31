@@ -73,14 +73,4 @@ Generated from the CSV files in the project on 31 July 2026. Date ranges are the
 | `Placebo_Short_Duration_Assets_Daily.csv` | Business/trading daily | 2020-01-02 | 2026-07-30 | 1,689 |
 | `Placebo_Short_Duration_Assets_LSEG_Raw.csv` | Business/trading daily | 2020-01-02 | 2026-07-30 | 1,689 |
 
-## Data-quality and interpretation notes
 
-1. The two Circle composition files are report datasets with multiple reserve-category rows per month. Their nominal frequency is monthly, but the observed month sequence contains gaps; the disclosed-only file has just eight distinct report months.
-2. The Tether composition file similarly has multiple asset-category rows per report date and a missing quarter in its observed sequence. The separate coverage grid records all 25 quarters from March 2020 through March 2026, including dates for which disclosures were unavailable.
-3. The two 5-minute crypto files have gaps substantially longer than five minutes, so “5-minute” describes the intended interval rather than uninterrupted coverage.
-4. The Global Policy Uncertainty file has 356 rows but only 354 unique year-month combinations, indicating two duplicate month records that should be reviewed before time-series merges.
-5. Different end dates across files mean a merged analysis should use an explicitly chosen common sample window or allow an unbalanced panel.
-
-## Method
-
-The report inspected every CSV under `Panel_A_Data` through `Panel_E_Data`, identified the relevant date or year/month field, parsed valid dates, and calculated minimum date, maximum date, and unique dated observations. Frequency classifications use both the file’s stated purpose/name and the observed spacing between consecutive dates.
