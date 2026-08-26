@@ -11,22 +11,25 @@ This folder collects the figures created for the Risk Transmission project.
 5. `02_Panel_A_Reserve_Composition.png`
 6. `03_Panel_B_Rates_Funding_and_Banks.png`
 7. `04_Panel_C_Crypto_ETFs_and_Tokenized_Funds.png`
-8. `05_Panel_D_Volatility_Uncertainty_and_Stress.png`
-9. `06_Panel_E_Placebo_Short_Duration_Assets.png`
+8. `05A_Panel_D_VIX_and_MOVE_Indices.png`
+9. `05B_Panel_D_Global_Policy_Uncertainty.png`
+10. `05C_Panel_D_Aggregate_Crypto_Market.png`
+11. `05D_Panel_D_Funding_Stress_Indicators.png`
+12. `06_Panel_E_Placebo_Short_Duration_Assets.png`
 
 ## Complete network dashboards
 
-10. `07_Conceptual_Directional_Risk_Heatmaps.png` — illustrative placeholder values.
-11. `08_VAR_Directional_Risk_Heatmaps.png` — actual VAR/GFEVD estimates.
-12. `09_VAR_Directional_Risk_Graphs.png` — ten strongest actual links per regime.
+13. `directional_risk_network_concept.png` — illustrative placeholder values.
+14. `08_VAR_Directional_Risk_Heatmaps.png` — actual VAR/GFEVD estimates.
+15. `09_VAR_Directional_Risk_Graphs.png` — ten strongest actual links per regime.
 
 ## Individual network figures
 
-13. `10_Conceptual_Bad_News_Heatmap.png`
-14. `11_Conceptual_Good_News_Heatmap.png`
-15. `12_VAR_Bad_News_Heatmap.png`
-16. `13_VAR_Good_News_Heatmap.png`
-17. `14_VAR_Bad_News_Directional_Graph.png`
-18. `15_VAR_Good_News_Directional_Graph.png`
+16. `10_Conceptual_Bad_News_Heatmap.png`
+17. `11_Conceptual_Good_News_Heatmap.png`
+18. `12_VAR_Bad_News_Heatmap.png`
+19. `13_VAR_Good_News_Heatmap.png`
+20. `14_VAR_Bad_News_Directional_Graph.png`
+21. `15_VAR_Good_News_Directional_Graph.png`
 
 The conceptual figures are presentation aids only. The VAR figures are predictive connectedness estimates and should not be interpreted as proven causal effects.
